@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 using namespace std;
@@ -9,25 +10,23 @@ struct Coin {
 };
 
 int main() {
+    ifstream input("input.file");
     //Get coins
-    cout << "enter number of coins: ";
     int num_coins;
-    cin >> num_coins;
+    input >> num_coins;
     Coin* coins = new Coin[num_coins+1];
     coins[0] = Coin();
 
     for (int i = 1; i <= num_coins; i++) {
-        cout << "enter value and weight for coin: ";
         int value, weight;
-        cin >> value >> weight;
+        input >> value >> weight;
 
         Coin new_coin = Coin{value = value, weight = weight};
         coins[i] = new_coin;
     }
     //Get sum
-    cout << "enter sum: ";
     int sum;
-    cin >> sum;
+    input >> sum;
 
     //Create weights matrix
     int** w_matrix = new int*[sum+1];
@@ -51,9 +50,11 @@ int main() {
                         w_matrix[s-coins[c].value][c] + coins[c].weight
                     );
                 }
-                else {w_matrix[s][c] = w_matrix[s-coins[c].value][c] + coins[c].weight;}
+                else {
+                    w_matrix[s][c] = w_matrix[s-coins[c].value][c] + coins[c].weight;
+                }
             }
-            else {w_matrix[s][c] = 0;}
+            else {w_matrix[s][c] = w_matrix[s][c-1];}
         }
     }
     //print weights matrix
@@ -80,10 +81,27 @@ int main() {
         }
     }
     //print set of coins
-    for(int i=0; i<set_coins.size(); i++) {
-        cout << "v=" << set_coins[i].value << ", w=" <<set_coins[i].weight << endl;
+    int** quant_coins = new int*[num_coins];
+    for ( int i = 0; i < num_coins; i++ ) {
+        quant_coins[i] = new int[2];
+        quant_coins[i][0] = coins[i+1].value;
+        quant_coins[i][1] = 0;
     }
-    cout << "amount: " << set_coins.size();
+
+    int weight = 0;
+    for(int i=0; i<set_coins.size(); i++) {
+        for (int j = 0; j < num_coins; j++) {
+            if(quant_coins[j][0] == set_coins[i].value) {quant_coins[j][1]++;}
+        } 
+        cout << "v=" << set_coins[i].value << ", w=" <<set_coins[i].weight << endl;
+        weight += set_coins[i].weight;
+    }
+    
+    cout << "quantity: " << set_coins.size() << endl;
+    cout << "weigt: " << weight << endl;
+    for (int i = 0; i < num_coins; i++) {
+        cout << 'v' << quant_coins[i][0] << ": " << quant_coins[i][1] << endl;
+    }
 
     return 0;
 }
